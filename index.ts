@@ -3,6 +3,7 @@ import app from "./config/app";
 import { apiPort } from "./config/setup";
 import "./config/middleware";
 import "./routes";
+import "./config/db";
 
 /** Constants */
 import { STATUS } from "./constants/status";
