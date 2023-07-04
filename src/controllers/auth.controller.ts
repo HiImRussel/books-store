@@ -52,7 +52,9 @@ export const login = async (
 
     if (error) return parseJoiError(error, res);
 
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({
+        where: { email },
+    });
 
     if (!user) return parseError(defaultLoginError, res);
 
@@ -67,13 +69,15 @@ export const login = async (
         expiresIn: `${TOKEN_EXPIRE_TIME_SECONDS}s`,
     });
 
+    (user.password as unknown) = undefined;
+
     res.json({ user, token, expireTime: TOKEN_EXPIRE_TIME_SECONDS });
 };
 
 export const loginAdmin = (req: Request, res: Response) =>
     login(req, res, true);
 
-export const refreshToken = (req: Request, res: Response) => {
+export const refreshToken = async (req: Request, res: Response) => {
     const auth = req.headers["authorization"];
     const token = auth && auth.split(" ")[1];
 
@@ -82,23 +86,41 @@ export const refreshToken = (req: Request, res: Response) => {
             .sendStatus(401)
             .json({ status: STATUS.ERROR, message: "Token is not defined" });
 
-    jwt.verify(token, jwtToken, (err, decoded: any) => {
+    jwt.verify(token, jwtToken, async (err, decoded: any) => {
         if (err)
             return res
                 .status(401)
                 .json({ status: STATUS.ERROR, message: "Token is not valid" });
 
+        const userId = decoded.userId;
+
         const newToken = jwt.sign(
-            { name: decoded.email, userId: decoded.id },
+            { name: decoded.email, userId: userId },
             jwtToken,
             {
                 expiresIn: `${TOKEN_EXPIRE_TIME_SECONDS}s`,
             }
         );
 
-        return res
-            .status(200)
-            .json({ token: newToken, expireTime: TOKEN_EXPIRE_TIME_SECONDS });
+        if (!decoded.userId)
+            return res
+                .sendStatus(401)
+                .json({ status: STATUS.ERROR, message: "UserID not found" });
+
+        const user = await User.findOne({ where: { id: userId } });
+
+        if (!user)
+            return res
+                .sendStatus(401)
+                .json({ status: STATUS.ERROR, message: "User not found" });
+
+        (user.password as unknown) = undefined;
+
+        return res.status(200).json({
+            user,
+            token: newToken,
+            expireTime: TOKEN_EXPIRE_TIME_SECONDS,
+        });
     });
 };
 
