@@ -17,6 +17,7 @@ if (!dbName || !dbLogin || !dbPassword || !dbHost)
 const sequelize = new Sequelize(dbName, dbLogin, dbPassword, {
     host: dbHost,
     dialect: "mysql",
+    logging: false,
 });
 
 sequelize
