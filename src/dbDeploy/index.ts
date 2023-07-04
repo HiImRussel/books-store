@@ -1,8 +1,8 @@
 /** Config */
-import sequelize from "../config/db";
+import sequelize from "../configs/db.config";
 
 /** Modles */
-import "../models/user";
+import "../models/user.model";
 
 sequelize
     .sync()

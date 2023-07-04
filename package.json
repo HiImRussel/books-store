@@ -8,7 +8,7 @@
         "start:prod": "npm run build && node ./dist/index.js",
         "build": "npx tsc",
         "start:nodemon": "./node_modules/nodemon/bin/nodemon.js",
-        "deployDB": "npm run build && node ./dist/dbDeploy/index.js"
+        "deployDB": "npm run build && node ./dist/src/dbDeploy/index.js"
     },
     "author": "",
     "license": "ISC",

@@ -8,14 +8,10 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
 /** Constants */
-import { STATUS } from "../constants/status";
+import { NOT_AUTHORIZED_RESPONSE } from "../constants/auth.constants";
 
 dotenv.config();
 
-const notAuthorizedResponse = {
-    status: STATUS.ERROR,
-    message: "Unauthorized!",
-};
 const secret = process.env.JWT_SECRET;
 
 if (!secret) throw new Error("JWT token is not defined!");
@@ -24,12 +20,12 @@ const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
 
-    if (!token || !secret) return res.status(403).json(notAuthorizedResponse);
+    if (!token || !secret) return res.status(403).json(NOT_AUTHORIZED_RESPONSE);
 
-    jwt.verify(token, secret, (err: any, decoded: any) => {
-        if (err) return res.status(401).json(notAuthorizedResponse);
+    jwt.verify(token, secret, (err, decoded: any) => {
+        if (err) return res.status(401).json(NOT_AUTHORIZED_RESPONSE);
 
-        req.userId = decoded.userId;
+        req.userId = decoded?.userId;
 
         next();
     });

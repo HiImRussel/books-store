@@ -2,7 +2,7 @@
 import { DataTypes } from "sequelize";
 
 /** Config */
-import sequelize from "../config/db";
+import sequelize from "../configs/db.config";
 
 import {
     Model,
@@ -19,6 +19,7 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
     declare city: string;
     declare postalCode: string;
     declare phoneNumber: number;
+    declare isAdmin?: boolean;
 }
 
 User.init(
@@ -54,6 +55,10 @@ User.init(
         phoneNumber: {
             type: DataTypes.INTEGER,
             allowNull: false,
+        },
+        isAdmin: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
         },
     },
     {

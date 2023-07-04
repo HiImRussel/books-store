@@ -2,12 +2,12 @@
 import { Router } from "express";
 
 /** Controllers */
-import { login, register } from "../controller/auth";
+import { deleteUser } from "../controllers/user.controller";
 
 /** Routes */
 const router = Router();
 
-router.post("/login", login);
-router.post("/register", register);
+/** Delete */
+router.delete("/delete/:id", deleteUser);
 
 export default router;

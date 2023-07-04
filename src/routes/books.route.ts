@@ -2,7 +2,7 @@
 import { Router } from "express";
 
 /** Controllers */
-import { getBooks } from "../controller/books";
+import { getBooks } from "../controllers/books.controller";
 
 const router = Router();
 

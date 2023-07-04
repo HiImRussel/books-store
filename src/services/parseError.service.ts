@@ -5,7 +5,7 @@ import { Response } from "express";
 import Joi from "joi";
 
 /** Contstants */
-import { STATUS } from "../constants/status";
+import { STATUS } from "../constants/status.constants";
 
 /** Types */
 import { Error } from "../types/error";
