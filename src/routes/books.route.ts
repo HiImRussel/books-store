@@ -1,11 +1,26 @@
 /** Express */
 import { Router } from "express";
 
-/** Controllers */
-import { getBooks } from "../controllers/books.controller";
+/** Middlewares */
+import verifyAdminRole from "../middlewares/verfyAdminRole.middleware";
 
+/** Controllers */
+import {
+    createBook,
+    getBooks,
+    deleteBook,
+} from "../controllers/books.controller";
+
+/** Routes */
 const router = Router();
 
-router.get("/all", getBooks);
+/** Get */
+router.get("/", getBooks);
+
+/** Post */
+router.post("/create", verifyAdminRole, createBook);
+
+/** Delete */
+router.delete("/delete/:id", verifyAdminRole, deleteBook);
 
 export default router;

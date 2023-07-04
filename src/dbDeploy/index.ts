@@ -3,11 +3,13 @@ import sequelize from "../configs/db.config";
 
 /** Modles */
 import "../models/user.model";
+import "../models/book.model";
+import "../models/userLibrary.model";
 
 sequelize
     .sync()
     .then(() => {
-        console.log("User table created successfully!");
+        console.log("Tables created successfully!");
     })
     .catch((error) => {
         console.error("Unable to create table : ", error);

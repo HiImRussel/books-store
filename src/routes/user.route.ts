@@ -1,6 +1,9 @@
 /** Express */
 import { Router } from "express";
 
+/** Middlewares */
+import verifyAdminRole from "../middlewares/verfyAdminRole.middleware";
+
 /** Controllers */
 import { deleteUser } from "../controllers/user.controller";
 
@@ -8,6 +11,6 @@ import { deleteUser } from "../controllers/user.controller";
 const router = Router();
 
 /** Delete */
-router.delete("/delete/:id", deleteUser);
+router.delete("/delete/:id", verifyAdminRole, deleteUser);
 
 export default router;

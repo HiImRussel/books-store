@@ -10,16 +10,9 @@ import { parseError } from "../services/parseError.service";
 /** Constants */
 import { STATUS } from "../constants/status.constants";
 import { GENERAL_FIELDS } from "../constants/fields.constants";
-import { NOT_AUTHORIZED_RESPONSE } from "../constants/auth.constants";
 
 export const deleteUser = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { userId } = req;
-
-    const user = await User.findOne({ where: { id: userId } });
-
-    if (!user || !user.isAdmin)
-        return res.status(403).json(NOT_AUTHORIZED_RESPONSE);
 
     const userToDelete = await User.findOne({ where: { id } });
 
