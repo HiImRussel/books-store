@@ -10,11 +10,6 @@ import dotenv from "dotenv";
 /** Constants */
 import { STATUS } from "../constants/status";
 
-/** Types */
-interface JWtRequest extends Request {
-    userId?: string;
-}
-
 dotenv.config();
 
 const notAuthorizedResponse = {
@@ -25,7 +20,7 @@ const secret = process.env.JWT_SECRET;
 
 if (!secret) throw new Error("JWT token is not defined!");
 
-const authJWT = (req: JWtRequest, res: Response, next: NextFunction) => {
+const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
 
@@ -34,9 +29,10 @@ const authJWT = (req: JWtRequest, res: Response, next: NextFunction) => {
     jwt.verify(token, secret, (err: any, decoded: any) => {
         if (err) return res.status(401).json(notAuthorizedResponse);
 
-        req.userId = decoded.id;
+        req.userId = decoded.userId;
+
         next();
     });
 };
 
-export default authJWT;
+export default verifyJWT;

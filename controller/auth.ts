@@ -16,7 +16,7 @@ import defaultSuccess from "../services/defaultSuccess";
 
 /** Constants */
 import { GENERAL_FIELDS } from "../constants/fields";
-import { TOKEN_EXPIRE_TIME } from "../constants/auth";
+import { TOKEN_EXPIRE_TIME_SECONDS } from "../constants/auth";
 
 /** Validation */
 import newUserSchema from "../validation/newUser";
@@ -56,7 +56,7 @@ export const login = async (req: Request, res: Response) => {
     if (!valid) return parseError(defaultLoginError, res);
 
     const token = jwt.sign({ name: user.email, userId: user.id }, jwtToken, {
-        expiresIn: `${TOKEN_EXPIRE_TIME}s`,
+        expiresIn: `${TOKEN_EXPIRE_TIME_SECONDS}s`,
     });
 
     res.json({ user, token });
