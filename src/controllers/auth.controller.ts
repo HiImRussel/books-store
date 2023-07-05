@@ -41,11 +41,7 @@ const defaultLoginError: Error[] = [
 
 if (!jwtToken) throw new Error("JWT token is not defined!");
 
-export const login = async (
-    req: Request,
-    res: Response,
-    loginAsAdmin?: boolean
-) => {
+export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     const { error } = loginSchema.validate({ email, password });
@@ -62,9 +58,6 @@ export const login = async (
 
     if (!valid) return parseError(defaultLoginError, res);
 
-    if (loginAsAdmin && !user.isAdmin)
-        return parseError(defaultLoginError, res);
-
     const token = jwt.sign({ name: user.email, userId: user.id }, jwtToken, {
         expiresIn: `${TOKEN_EXPIRE_TIME_SECONDS}s`,
     });
@@ -73,9 +66,6 @@ export const login = async (
 
     res.json({ user, token, expireTime: TOKEN_EXPIRE_TIME_SECONDS });
 };
-
-export const loginAdmin = (req: Request, res: Response) =>
-    login(req, res, true);
 
 export const refreshToken = async (req: Request, res: Response) => {
     const auth = req.headers["authorization"];
@@ -124,14 +114,22 @@ export const refreshToken = async (req: Request, res: Response) => {
     });
 };
 
-export const register = async (req: Request, res: Response) => {
-    const { email, password, address, phoneNumber } = req.body;
+export const register = async (
+    req: Request,
+    res: Response,
+    registerByAdmin?: boolean
+) => {
+    const { email, password, phoneNumber, address, city, postalCode, country } =
+        req.body;
 
     const { error } = newUserSchema.validate({
         email,
         password,
-        address,
         phoneNumber,
+        address,
+        city,
+        postalCode,
+        country,
     });
 
     if (error) return parseJoiError(error, res);
@@ -141,10 +139,12 @@ export const register = async (req: Request, res: Response) => {
     const newUser = {
         email,
         password: passwordHash,
-        address: address.address,
-        city: address.city,
-        postalCode: address.postalCode,
         phoneNumber,
+        address,
+        city,
+        postalCode,
+        country,
+        isAdmin: registerByAdmin ? req.body.isAdmin || false : false,
     };
 
     const user = await User.findOne({ where: { email } });
@@ -159,3 +159,6 @@ export const register = async (req: Request, res: Response) => {
 
     defaultSuccess(res, 201);
 };
+
+export const registerByAdmin = (req: Request, res: Response) =>
+    register(req, res, true);

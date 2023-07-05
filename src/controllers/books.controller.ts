@@ -23,6 +23,7 @@ import newBookSchema from "../validations/newBook.validation";
 
 /** Models */
 import Book from "../models/book.model";
+import UserLibrary from "../models/userLibrary.model";
 
 export const getBooks = async (req: Request, res: Response) => {
     const { searchTerm } = req.query;
@@ -49,8 +50,34 @@ export const getBooks = async (req: Request, res: Response) => {
 
     res.status(200).json({
         status: STATUS.OK,
-        data: addPaginationToResponse(books.rows, books.count, page, pageSize),
+        ...addPaginationToResponse(books.rows, books.count, page, pageSize),
     });
+};
+
+export const getBook = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { userId } = req;
+
+    if (!id)
+        return res
+            .status(400)
+            .json({ status: STATUS.ERROR, message: "Book id is required!" });
+
+    const book = await Book.findOne({ where: { id } });
+    const isInUserLibrary = await UserLibrary.findOne({
+        where: { userId, bookId: id },
+    });
+
+    if (!book)
+        return res
+            .status(404)
+            .json({ status: STATUS.ERROR, message: "Book not found!" });
+
+    const bookResponse = { ...book.dataValues };
+    (bookResponse as Book & { isInUserLibrary: boolean })["isInUserLibrary"] =
+        !!isInUserLibrary;
+
+    res.status(200).json({ status: STATUS.OK, data: bookResponse });
 };
 
 export const createBook = async (req: Request, res: Response) => {

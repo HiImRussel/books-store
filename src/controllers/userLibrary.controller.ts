@@ -22,14 +22,28 @@ export const getUserLibrary = async (req: Request, res: Response) => {
 
     if (!userId) return res.status(403).json(NOT_AUTHORIZED_RESPONSE);
 
-    const books = await UserLibrary.findAndCountAll({
+    const userLibrary = await UserLibrary.findAndCountAll({
         where: { userId },
         ...paginate(page, pageSize),
+    });
+    const books = await Book.findAndCountAll({
+        where: { id: userLibrary.rows.map((book) => book.bookId) },
+    });
+    const booksData = books.rows.map((book) => {
+        const data = { ...book.dataValues };
+        (data as Book & { isInUserLibrary: boolean })["isInUserLibrary"] = true;
+
+        return data;
     });
 
     res.status(200).json({
         status: STATUS.OK,
-        data: addPaginationToResponse(books.rows, books.count, page, pageSize),
+        ...addPaginationToResponse(
+            booksData,
+            userLibrary.count,
+            page,
+            pageSize
+        ),
     });
 };
 
@@ -70,5 +84,16 @@ export const updateBookStatusInLibrary = async (
         await Book.increment("quantity", { where: { id: bookId } });
     }
 
-    res.status(200).json({ status: STATUS.OK });
+    const updatedBook = await Book.findOne({ where: { id: bookId } });
+
+    if (!updatedBook)
+        return res
+            .status(404)
+            .json({ status: STATUS.ERROR, message: "Book not found!" });
+
+    const bookResponse = { ...updatedBook.dataValues };
+    (bookResponse as Book & { isInUserLibrary: boolean })["isInUserLibrary"] =
+        !bookInLibrary;
+
+    res.status(200).json({ status: STATUS.OK, data: bookResponse });
 };

@@ -1,6 +1,9 @@
 /** Express */
 import { Router } from "express";
 
+/** Middleware */
+import verifyJWT from "../middlewares/verifyJWT.middleware";
+
 /** Controllers */
 import {
     getUserLibrary,
@@ -11,9 +14,9 @@ import {
 const router = Router();
 
 /** Get */
-router.get("/", getUserLibrary);
+router.get("/", verifyJWT, getUserLibrary);
 
 /** Post */
-router.post("/update", updateBookStatusInLibrary);
+router.post("/update", verifyJWT, updateBookStatusInLibrary);
 
 export default router;

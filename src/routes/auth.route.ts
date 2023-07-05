@@ -1,15 +1,16 @@
 /** Express */
-import { Router, Request, Response } from "express";
+import { Request, Response, Router } from "express";
 
 /** Middleware */
 import verifyJWT from "../middlewares/verifyJWT.middleware";
+import verifyAdminRole from "../middlewares/verfyAdminRole.middleware";
 
 /** Controllers */
 import {
     login,
     register,
-    loginAdmin,
     refreshToken,
+    registerByAdmin,
 } from "../controllers/auth.controller";
 
 /** Routes */
@@ -19,8 +20,8 @@ const router = Router();
 router.get("/refreshToken", verifyJWT, refreshToken);
 
 /** Post */
-router.post("/login", (req: Request, res: Response) => login(req, res));
-router.post("/register", register);
-router.post("/login-admin", loginAdmin);
+router.post("/login", login);
+router.post("/register", (req: Request, res: Response) => register(req, res));
+router.post("/registerByAdmin", verifyJWT, verifyAdminRole, registerByAdmin);
 
 export default router;

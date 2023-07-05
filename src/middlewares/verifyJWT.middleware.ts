@@ -23,7 +23,7 @@ const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
     if (!token || !secret) return res.status(403).json(NOT_AUTHORIZED_RESPONSE);
 
     jwt.verify(token, secret, (err, decoded: any) => {
-        if (err) return res.status(401).json(NOT_AUTHORIZED_RESPONSE);
+        if (err) return res.status(403).json(NOT_AUTHORIZED_RESPONSE);
 
         req.userId = decoded?.userId;
 
