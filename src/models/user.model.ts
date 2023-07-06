@@ -19,6 +19,7 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
     declare city: string;
     declare postalCode: string;
     declare phoneNumber: number;
+    declare removed?: boolean;
     declare isAdmin?: boolean;
 }
 
@@ -59,6 +60,11 @@ User.init(
         isAdmin: {
             type: DataTypes.BOOLEAN,
             defaultValue: false,
+        },
+        removed: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+            allowNull: true,
         },
     },
     {

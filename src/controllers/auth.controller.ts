@@ -49,7 +49,8 @@ export const login = async (req: Request, res: Response) => {
     if (error) return parseJoiError(error, res);
 
     const user = await User.findOne({
-        where: { email },
+        attributes: { exclude: ["removed"] },
+        where: { email, removed: false },
     });
 
     if (!user) return parseError(defaultLoginError, res);
@@ -97,14 +98,15 @@ export const refreshToken = async (req: Request, res: Response) => {
                 .sendStatus(401)
                 .json({ status: STATUS.ERROR, message: "UserID not found" });
 
-        const user = await User.findOne({ where: { id: userId } });
+        const user = await User.findOne({
+            attributes: { exclude: ["password", "removed"] },
+            where: { id: userId, removed: false },
+        });
 
         if (!user)
             return res
                 .sendStatus(401)
                 .json({ status: STATUS.ERROR, message: "User not found" });
-
-        (user.password as unknown) = undefined;
 
         return res.status(200).json({
             user,
@@ -119,7 +121,7 @@ export const register = async (
     res: Response,
     registerByAdmin?: boolean
 ) => {
-    const { email, password, phoneNumber, address, city, postalCode, country } =
+    const { email, password, phoneNumber, address, city, postalCode } =
         req.body;
 
     const { error } = newUserSchema.validate({
@@ -129,7 +131,6 @@ export const register = async (
         address,
         city,
         postalCode,
-        country,
     });
 
     if (error) return parseJoiError(error, res);
@@ -143,7 +144,6 @@ export const register = async (
         address,
         city,
         postalCode,
-        country,
         isAdmin: registerByAdmin ? req.body.isAdmin || false : false,
     };
 

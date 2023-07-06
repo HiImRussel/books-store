@@ -14,7 +14,7 @@ const verifyAdminRole = async (
 ) => {
     const { userId } = req;
 
-    const user = await User.findOne({ where: { id: userId } });
+    const user = await User.findOne({ where: { id: userId, removed: false } });
 
     if (!user || !user.isAdmin)
         return res.status(403).json(NOT_AUTHORIZED_RESPONSE);
