@@ -11,6 +11,7 @@ import {
     getBooks,
     deleteBook,
     getBook,
+    updateBook,
 } from "../controllers/books.controller";
 
 /** Routes */
@@ -22,6 +23,9 @@ router.get("/book/:id", verifyJWT, getBook);
 
 /** Post */
 router.post("/create", verifyJWT, verifyAdminRole, createBook);
+
+/** Patch */
+router.patch("/update/:id", verifyJWT, verifyAdminRole, updateBook);
 
 /** Delete */
 router.delete("/delete/:id", verifyJWT, verifyAdminRole, deleteBook);

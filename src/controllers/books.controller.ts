@@ -106,6 +106,39 @@ export const createBook = async (req: Request, res: Response) => {
     res.status(201).json({ status: STATUS.OK, data: book });
 };
 
+export const updateBook = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { title, author, description, coverImgURL, quantity } = req.body;
+
+    const { error } = bookSchema.validate({
+        title,
+        author,
+        description,
+        coverImgURL,
+        quantity,
+    });
+
+    if (error) return parseJoiError(error, res);
+
+    const book = await Book.findOne({ where: { id, removed: false } });
+
+    if (!book)
+        return res
+            .status(404)
+            .json({ status: STATUS.ERROR, message: "Book not found!" });
+
+    Book.update(
+        { title, author, description, coverImgURL, quantity },
+        { where: { id } }
+    )
+        .then(() => res.json({ status: STATUS.OK }))
+        .catch(() =>
+            res
+                .status(500)
+                .json({ status: STATUS.ERROR, message: "Failed to update!" })
+        );
+};
+
 export const deleteBook = async (req: Request, res: Response) => {
     const { id } = req.params;
 
