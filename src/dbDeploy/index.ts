@@ -5,6 +5,7 @@ import sequelize from "../configs/db.config";
 import "../models/user.model";
 import "../models/book.model";
 import "../models/userLibrary.model";
+import "../models/libraryHistory.model";
 
 sequelize
     .sync()

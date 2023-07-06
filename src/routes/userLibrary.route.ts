@@ -7,6 +7,7 @@ import verifyJWT from "../middlewares/verifyJWT.middleware";
 /** Controllers */
 import {
     getUserLibrary,
+    getUserLibraryHistory,
     updateBookStatusInLibrary,
 } from "../controllers/userLibrary.controller";
 
@@ -15,6 +16,7 @@ const router = Router();
 
 /** Get */
 router.get("/", verifyJWT, getUserLibrary);
+router.get("/history", verifyJWT, getUserLibraryHistory);
 
 /** Post */
 router.post("/update", verifyJWT, updateBookStatusInLibrary);

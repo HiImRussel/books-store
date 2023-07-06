@@ -15,6 +15,7 @@ import {
 /** Models */
 import UserLibrary from "../models/userLibrary.model";
 import Book from "../models/book.model";
+import LibraryHistory from "../models/libraryHistory.model";
 
 export const getUserLibrary = async (req: Request, res: Response) => {
     const { userId } = req;
@@ -41,6 +42,31 @@ export const getUserLibrary = async (req: Request, res: Response) => {
         ...addPaginationToResponse(
             booksData,
             userLibrary.count,
+            page,
+            pageSize
+        ),
+    });
+};
+
+export const getUserLibraryHistory = async (req: Request, res: Response) => {
+    const { userId } = req;
+    const { page, pageSize } = getPaginationData(req, "query");
+
+    if (!userId) return res.status(403).json(NOT_AUTHORIZED_RESPONSE);
+
+    const userLibraryHistory = await LibraryHistory.findAndCountAll({
+        where: { userId },
+        ...paginate(page, pageSize),
+    });
+    const books = await Book.findAll({
+        where: { id: userLibraryHistory.rows.map((book) => book.bookId) },
+    });
+
+    res.status(200).json({
+        status: STATUS.OK,
+        ...addPaginationToResponse(
+            books,
+            userLibraryHistory.count,
             page,
             pageSize
         ),
@@ -83,6 +109,14 @@ export const updateBookStatusInLibrary = async (
     if (!bookInLibrary && bookData) {
         await UserLibrary.create({ userId, bookId });
         await Book.decrement("quantity", { where: { id: bookId } });
+
+        const isInHistory = await LibraryHistory.findOne({
+            where: { userId, bookId },
+        });
+
+        if (!isInHistory) {
+            await LibraryHistory.create({ userId, bookId });
+        }
     } else {
         await UserLibrary.destroy({ where: { userId, bookId } });
 
