@@ -21,9 +21,9 @@ router.get("/", verifyJWT, getBooks);
 router.get("/book/:id", verifyJWT, getBook);
 
 /** Post */
-router.post("/create", verifyAdminRole, createBook);
+router.post("/create", verifyJWT, verifyAdminRole, createBook);
 
 /** Delete */
-router.delete("/delete/:id", verifyAdminRole, deleteBook);
+router.delete("/delete/:id", verifyJWT, verifyAdminRole, deleteBook);
 
 export default router;

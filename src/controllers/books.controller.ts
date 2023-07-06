@@ -19,7 +19,7 @@ import {
 import { parseJoiError } from "../services/parseError.service";
 
 /** Validation */
-import newBookSchema from "../validations/newBook.validation";
+import bookSchema from "../validations/book.validation";
 
 /** Models */
 import Book from "../models/book.model";
@@ -41,8 +41,10 @@ export const getBooks = async (req: Request, res: Response) => {
 
     if (error) return parseJoiError(error, res);
 
+    query["where"] = {};
+    query["where"]["removed"] = { [Op.notLike]: true };
+
     if (searchTerm) {
-        query["where"] = {};
         query["where"]["title"] = { [Op.like]: `%${searchTerm}%` };
     }
 
@@ -83,7 +85,7 @@ export const getBook = async (req: Request, res: Response) => {
 export const createBook = async (req: Request, res: Response) => {
     const { title, author, description, coverImgURL, quantity } = req.body;
 
-    const { error } = newBookSchema.validate({
+    const { error } = bookSchema.validate({
         title,
         author,
         description,
@@ -112,14 +114,14 @@ export const deleteBook = async (req: Request, res: Response) => {
             .status(400)
             .json({ status: STATUS.ERROR, message: "Book id is required!" });
 
-    const book = await Book.findOne({ where: { id } });
+    const book = await Book.findOne({ where: { id, removed: false } });
 
     if (!book)
         return res
             .status(404)
             .json({ status: STATUS.ERROR, message: "Book not found!" });
 
-    Book.destroy({ where: { id } })
+    Book.update({ removed: true, quantity: 0 }, { where: { id } })
         .then(() => res.json({ status: STATUS.OK }))
         .catch(() =>
             res

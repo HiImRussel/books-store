@@ -18,6 +18,7 @@ class Book extends Model<InferAttributes<Book>, InferCreationAttributes<Book>> {
     declare author: string;
     declare description: string;
     declare quantity: number;
+    declare removed?: boolean;
 }
 
 Book.init(
@@ -45,6 +46,11 @@ Book.init(
         quantity: {
             type: DataTypes.INTEGER,
             allowNull: false,
+        },
+        removed: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+            allowNull: true,
         },
     },
     {

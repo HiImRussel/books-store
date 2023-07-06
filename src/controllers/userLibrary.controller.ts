@@ -76,12 +76,19 @@ export const updateBookStatusInLibrary = async (
             .status(400)
             .json({ status: STATUS.ERROR, message: "Book is not available!" });
 
-    if (!bookInLibrary) {
+    const bookData = await Book.findOne({
+        where: { id: bookId, removed: false },
+    });
+
+    if (!bookInLibrary && bookData) {
         await UserLibrary.create({ userId, bookId });
         await Book.decrement("quantity", { where: { id: bookId } });
     } else {
         await UserLibrary.destroy({ where: { userId, bookId } });
-        await Book.increment("quantity", { where: { id: bookId } });
+
+        if (bookData) {
+            await Book.increment("quantity", { where: { id: bookId } });
+        }
     }
 
     const updatedBook = await Book.findOne({ where: { id: bookId } });
