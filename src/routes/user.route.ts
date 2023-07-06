@@ -22,6 +22,6 @@ router.get("/:id", verifyJWT, verifyAdminRole, getUser);
 router.delete("/delete/:id", verifyJWT, verifyAdminRole, deleteUser);
 
 /** Patch */
-router.patch("/update/:id", verifyJWT, updateUser);
+router.patch("/update/:id", verifyJWT, verifyAdminRole, updateUser);
 
 export default router;
