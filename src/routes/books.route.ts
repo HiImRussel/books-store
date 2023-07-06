@@ -12,6 +12,7 @@ import {
     deleteBook,
     getBook,
     updateBook,
+    getBooksHistory,
 } from "../controllers/books.controller";
 
 /** Routes */
@@ -20,6 +21,7 @@ const router = Router();
 /** Get */
 router.get("/", verifyJWT, getBooks);
 router.get("/book/:id", verifyJWT, getBook);
+router.get("/history", verifyJWT, verifyAdminRole, getBooksHistory);
 
 /** Post */
 router.post("/create", verifyJWT, verifyAdminRole, createBook);

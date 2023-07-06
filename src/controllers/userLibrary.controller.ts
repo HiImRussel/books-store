@@ -16,6 +16,7 @@ import {
 import UserLibrary from "../models/userLibrary.model";
 import Book from "../models/book.model";
 import LibraryHistory from "../models/libraryHistory.model";
+import BooksHistory from "../models/booksHistory.model";
 
 export const getUserLibrary = async (req: Request, res: Response) => {
     const { userId } = req;
@@ -108,7 +109,17 @@ export const updateBookStatusInLibrary = async (
 
     if (!bookInLibrary && bookData) {
         await UserLibrary.create({ userId, bookId });
-        await Book.decrement("quantity", { where: { id: bookId } });
+        await Book.decrement("quantity", { where: { id: bookId } }).then(
+            async () => {
+                await BooksHistory.create({
+                    message: `Book ${
+                        bookData.title
+                    } was taken by User ID ${userId}, current quantity: ${
+                        bookData.quantity - 1
+                    }`,
+                });
+            }
+        );
 
         const isInHistory = await LibraryHistory.findOne({
             where: { userId, bookId },
@@ -121,7 +132,17 @@ export const updateBookStatusInLibrary = async (
         await UserLibrary.destroy({ where: { userId, bookId } });
 
         if (bookData) {
-            await Book.increment("quantity", { where: { id: bookId } });
+            await Book.increment("quantity", { where: { id: bookId } }).then(
+                async () => {
+                    await BooksHistory.create({
+                        message: `Book ${
+                            bookData.title
+                        } was returned by User ID ${userId}, current quantity: ${
+                            bookData.quantity + 1
+                        }`,
+                    });
+                }
+            );
         }
     }
 

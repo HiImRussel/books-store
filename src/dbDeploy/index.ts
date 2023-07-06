@@ -6,6 +6,7 @@ import "../models/user.model";
 import "../models/book.model";
 import "../models/userLibrary.model";
 import "../models/libraryHistory.model";
+import "../models/booksHistory.model";
 
 sequelize
     .sync()

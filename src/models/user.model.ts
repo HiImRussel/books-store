@@ -1,15 +1,14 @@
 /** Sequelize */
-import { DataTypes } from "sequelize";
-
-/** Config */
-import sequelize from "../configs/db.config";
-
 import {
     Model,
     InferAttributes,
     InferCreationAttributes,
     CreationOptional,
+    DataTypes,
 } from "sequelize";
+
+/** Config */
+import sequelize from "../configs/db.config";
 
 class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
     declare id: CreationOptional<number>;

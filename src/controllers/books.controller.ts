@@ -24,6 +24,7 @@ import bookSchema from "../validations/book.validation";
 /** Models */
 import Book from "../models/book.model";
 import UserLibrary from "../models/userLibrary.model";
+import BooksHistory from "../models/booksHistory.model";
 
 export const getBooks = async (req: Request, res: Response) => {
     const { searchTerm } = req.query;
@@ -82,8 +83,42 @@ export const getBook = async (req: Request, res: Response) => {
     res.status(200).json({ status: STATUS.OK, data: bookResponse });
 };
 
+export const getBooksHistory = async (req: Request, res: Response) => {
+    const { userId } = req;
+    const { searchTerm } = req.query;
+    const { page, pageSize } = getPaginationData(req, "query");
+
+    if (!userId)
+        return res
+            .status(403)
+            .json({ status: STATUS.ERROR, message: "Not authorized!" });
+
+    const query: { [key: string]: any } = {
+        order: [["id", "DESC"]],
+        ...paginate(page, pageSize),
+    };
+
+    if (searchTerm) {
+        query["where"] = {};
+        query["where"]["message"] = { [Op.like]: `%${searchTerm}%` };
+    }
+
+    const booksHistory = await BooksHistory.findAndCountAll(query);
+
+    res.status(200).json({
+        status: STATUS.OK,
+        ...addPaginationToResponse(
+            booksHistory.rows,
+            booksHistory.count,
+            page,
+            pageSize
+        ),
+    });
+};
+
 export const createBook = async (req: Request, res: Response) => {
     const { title, author, description, coverImgURL, quantity } = req.body;
+    const { userId } = req;
 
     const { error } = bookSchema.validate({
         title,
@@ -101,6 +136,10 @@ export const createBook = async (req: Request, res: Response) => {
         description,
         coverImgURL,
         quantity,
+    }).then(async (book) => {
+        await BooksHistory.create({
+            message: `Book ${book.title} was created! Book ID: ${book.id}, User who created: ${userId}`,
+        });
     });
 
     res.status(201).json({ status: STATUS.OK, data: book });
@@ -109,6 +148,7 @@ export const createBook = async (req: Request, res: Response) => {
 export const updateBook = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { title, author, description, coverImgURL, quantity } = req.body;
+    const { userId } = req;
 
     const { error } = bookSchema.validate({
         title,
@@ -131,7 +171,13 @@ export const updateBook = async (req: Request, res: Response) => {
         { title, author, description, coverImgURL, quantity },
         { where: { id } }
     )
-        .then(() => res.json({ status: STATUS.OK }))
+        .then(async () => {
+            await BooksHistory.create({
+                message: `Book ${book.title} was updated! Book ID: ${book.id}, User who updated: ${userId}`,
+            });
+
+            return res.json({ status: STATUS.OK });
+        })
         .catch(() =>
             res
                 .status(500)
@@ -141,6 +187,7 @@ export const updateBook = async (req: Request, res: Response) => {
 
 export const deleteBook = async (req: Request, res: Response) => {
     const { id } = req.params;
+    const { userId } = req;
 
     if (!id)
         return res
@@ -155,7 +202,13 @@ export const deleteBook = async (req: Request, res: Response) => {
             .json({ status: STATUS.ERROR, message: "Book not found!" });
 
     Book.update({ removed: true, quantity: 0 }, { where: { id } })
-        .then(() => res.json({ status: STATUS.OK }))
+        .then(async () => {
+            await BooksHistory.create({
+                message: `Book ${book.title} was deleted! Book ID: ${book.id}, User who deleted: ${userId}`,
+            });
+
+            return res.json({ status: STATUS.OK });
+        })
         .catch(() =>
             res
                 .status(500)
