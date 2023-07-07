@@ -162,3 +162,43 @@ export const register = async (
 
 export const registerByAdmin = (req: Request, res: Response) =>
     register(req, res, true);
+
+export const changePassword = async (req: Request, res: Response) => {
+    const { userId } = req;
+    const { newPassword } = req.body;
+
+    if (!userId)
+        return res.status(400).json({
+            status: STATUS.ERROR,
+            message: "Failed to update password",
+        });
+
+    if (!newPassword || newPassword?.length < 6)
+        return parseError(
+            [{ field: "password", message: "Password minimum 6 characters" }],
+            res
+        );
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    const targetUser = await User.findOne({ where: { id: userId } });
+
+    if (!targetUser)
+        return res
+            .status(400)
+            .json({ status: STATUS.ERROR, message: "User not found" });
+
+    User.update({ password: passwordHash }, { where: { id: userId } })
+        .then(() =>
+            res.status(200).json({
+                status: STATUS.OK,
+                message: "Password updated successfully",
+            })
+        )
+        .catch(() =>
+            res.status(400).json({
+                status: STATUS.ERROR,
+                message: "Failed to update password",
+            })
+        );
+};

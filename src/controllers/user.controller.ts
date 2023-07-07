@@ -44,7 +44,37 @@ export const getUser = async (req: Request, res: Response) => {
 export const updateUser = async (req: Request, res: Response) => {
     const { userId } = req;
     const { id } = req.params;
-    const { phoneNumber, address, city, postalCode, isAdmin } = req.body;
+    const { phoneNumber, address, city, postalCode } = req.body;
+    let { isAdmin } = req.body;
+
+    if (!id || !userId)
+        return parseError(
+            [{ field: GENERAL_FIELDS, message: "User not found!" }],
+            res
+        );
+
+    const userWhichUpdating = await User.findOne({ where: { id: userId } });
+
+    if (!userWhichUpdating)
+        return parseError(
+            [{ field: GENERAL_FIELDS, message: "User not found!" }],
+            res
+        );
+
+    if (!userWhichUpdating.isAdmin && userId !== +id)
+        return res.status(403).json({
+            status: STATUS.ERROR,
+            errors: [
+                {
+                    field: GENERAL_FIELDS,
+                    message: "You are not allowed to update this user!",
+                },
+            ],
+        });
+
+    if (!userWhichUpdating.isAdmin) {
+        isAdmin = undefined;
+    }
 
     const { error } = updateUserSchema.validate({
         phoneNumber,
@@ -56,18 +86,7 @@ export const updateUser = async (req: Request, res: Response) => {
 
     if (error) return parseJoiError(error, res);
 
-    if (!userId)
-        return parseError(
-            [{ field: GENERAL_FIELDS, message: "User not found!" }],
-            res
-        );
-
-    const userThatIsUpdating = await User.findOne({
-        attributes: { exclude: ["password", "removed"] },
-        where: { id: userId, removed: false },
-    });
-
-    if (!userThatIsUpdating)
+    if (!userWhichUpdating)
         return parseError(
             [{ field: GENERAL_FIELDS, message: "User not found!" }],
             res
@@ -78,7 +97,7 @@ export const updateUser = async (req: Request, res: Response) => {
         address,
         city,
         postalCode,
-        isAdmin: userThatIsUpdating.isAdmin ? isAdmin : false,
+        isAdmin: userWhichUpdating.isAdmin ? isAdmin : false,
     };
 
     const userToUpdate = await User.findOne({ where: { id, removed: false } });
