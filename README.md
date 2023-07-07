@@ -13,18 +13,18 @@ Create MySql database and set charset to utf8_general_ci
 
 #### App:
 
-Before running the app remember to modify .env file.
+Before running the app remember to modify the .env file.
 
-Go to root directory and run following commands:
+Go to the root directory and run the following commands:
 
 1. npm i
 2. npm run deployDB (to create tables)
 3. npm run runSeeders (to create data in the tables)
-4. npm run start (to start development server) or npm run start:nodemon (to start development server with nodemon)
+4. npm run start (to start the development server) or npm run start:nodemon (to start the development server with nodemon)
 
 # Setup
 
-Go to file ".env" located in root directrory. Modify values if you need.
+Go to file ".env" located in the root directory. Modify values if you need.
 
 # To Do
 
