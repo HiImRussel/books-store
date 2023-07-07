@@ -5,9 +5,14 @@ import sequelize from "../configs/db.config";
 import User from "../models/user.model";
 
 const seedUsers = async () => {
+    await User.destroy({
+        where: {},
+        truncate: true,
+    });
+
     //password: test123
     await User.create({
-        email: "testxD@test.com",
+        email: "test@test.com",
         password:
             "$2b$10$MyK6pq/9lY4Hp4Okfic09eYvPHFcVJ0o2VgqNPrbno.Enwb1wLUfO",
         address: "address",
@@ -18,7 +23,7 @@ const seedUsers = async () => {
     });
 
     await User.create({
-        email: "testsdfs2@test.com",
+        email: "test2@test.com",
         password:
             "$2b$10$MyK6pq/9lY4Hp4Okfic09eYvPHFcVJ0o2VgqNPrbno.Enwb1wLUfO",
         address: "address",
